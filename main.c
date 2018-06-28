@@ -1,16 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "list.h"
 
 
-static INIT_LIST(l); // list head of what you want, keep it updated during the whole program, here list of name
-// declare and initialise a static strut list l;
+static LIST_HEAD(l);
+
 
 struct person
 {
     char *name;
-    struct list node; // node, same for every struct, allows kernel list
+    struct list_head node;
 };
 
 
@@ -23,7 +24,7 @@ static int add_person(const char *person_name)
 
     new->name = strdup(person_name);
 
-    list_add_tail(&l, &(new->node));
+    list_add_tail(&(new->node), &l);
 
     printf("person_name[%s]:added\n", person_name);
 
@@ -35,7 +36,7 @@ static void dump_person_list()
 {
     unsigned int i = 0;
     struct person *p = NULL;
-    for_each_entry(p, &l, node) {
+    list_for_each_entry(p, &l, node) {
         printf("dump name[%s]:id[%d]\n", p->name, i);
         i++;
     }
@@ -45,7 +46,7 @@ static void dump_person_list()
 static void clean_person_list()
 {
     struct person *p;
-    for_each_entry(p, &l, node) {
+    list_for_each_entry(p, &l, node) {
         free(p->name);
         free(p);
     }
