@@ -5,7 +5,7 @@
 #include "list.h"
 
 
-static LIST_HEAD(l);
+static LIST_HEAD(person_head);
 
 
 struct person
@@ -18,14 +18,11 @@ struct person
 static int add_person(const char *person_name)
 {
     struct person *new = calloc(1, sizeof(struct person));
-    if (new == NULL) {
+    if (new == NULL)
         return -1;
-    }
 
     new->name = strdup(person_name);
-
-    list_add_tail(&(new->node), &l);
-
+    list_add_tail(&(new->node), &person_head);
     printf("person_name[%s]:added\n", person_name);
 
     return 0;
@@ -36,7 +33,7 @@ static void dump_person_list()
 {
     unsigned int i = 0;
     struct person *p = NULL;
-    list_for_each_entry(p, &l, node) {
+    list_for_each_entry(p, &person_head, node) {
         printf("dump name[%s]:id[%d]\n", p->name, i);
         i++;
     }
@@ -45,15 +42,16 @@ static void dump_person_list()
 
 static void clean_person_list()
 {
-    struct person *p;
-    list_for_each_entry(p, &l, node) {
+    struct person *p, *save;
+    list_for_each_entry_safe(p, save, &person_head, node) {
+        list_del(&(p->node));
         free(p->name);
         free(p);
     }
 }
 
 
-static int entry()
+int main()
 {
     add_person("Mike");
     add_person("Georges");
@@ -61,27 +59,19 @@ static int entry()
 
     dump_person_list();
 
-    printf("nbr_of_person_in_list[%ld]\n", list_length(&l));
+    printf("nbr_of_person_in_list[%ld]\n", list_length(&person_head));
 
     clean_person_list();
-
-    init_list(&l);
+    printf("person_list cleaned\n");
 
     add_person("Louis");
 
     dump_person_list();
 
-    printf("nbr_of_person_in_list[%ld]\n", list_length(&l));
+    printf("nbr_of_person_in_list[%ld]\n", list_length(&person_head));
 
     clean_person_list();
 
-    return 0;
-}
-
-
-int main()
-{
-    entry();
     return 0;
 }
 
